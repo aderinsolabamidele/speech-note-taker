@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Speech Detection Note-Taker</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #FF7E5F, #FEB47B);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            text-align: center;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            width: 85%;
+            max-width: 700px;
+            border: 2px solid #FF7E5F;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #FF7E5F;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #FF7E5F;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #FEB47B;
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1rem;
+            border: 2px solid #FF7E5F;
+        }
+
+        .output {
+            margin-top: 25px;
+            font-size: 1.3rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 150px;
+            padding: 15px;
+            background-color: #FFEB3B;
+            border: 2px solid #FF7E5F;
+            border-radius: 10px;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Adding responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Enhanced Speech Detection Note-Taker</h1>
+        <div class="buttons">
+            <button id="start-btn">Start Listening</button>
+            <button id="stop-btn" disabled>Stop Listening</button>
+            <button id="clear-btn">Clear Notes</button>
+            <button id="save-btn">Save Notes</button>
+        </div>
+        <select id="language-select">
+            <option value="en-US" selected>English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+        </select>
+        <div id="output" class="output">Your speech will appear here...</div>
+    </div>
+
+    <script>
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const outputDiv = document.getElementById('output');
+            const languageSelect = document.getElementById('language-select');
+
+            let isListening = false;
+
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            // Start recognition
+            startBtn.addEventListener('click', () => {
+                recognition.lang = languageSelect.value;
+                recognition.start();
+                isListening = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                startBtn.textContent = 'Listening...';
+            });
+
+            // Stop recognition
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();
+                isListening = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                startBtn.textContent = 'Start Listening';
+            });
+
+            // Clear notes
+            clearBtn.addEventListener('click', () => {
+                outputDiv.textContent = 'Your speech will appear here...';
+            });
+
+            // Save notes
+            saveBtn.addEventListener('click', () => {
+                const blob = new Blob([outputDiv.textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'speech-notes.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // Capture speech results
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                outputDiv.textContent = transcript;
+            };
+
+            // Handle errors
+            recognition.onerror = (event) => {
+                console.error('Speech Recognition Error:', event.error);
+                alert(`Error: ${event.error}`);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            // Reset button state when recognition ends
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start();
+                } else {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    startBtn.textContent = 'Start Listening';
+                }
+            };
+        } else {
+            alert("Speech Recognition API is not supported in this browser.");
+        }
+    </script>
+
+</body>
+</html>
