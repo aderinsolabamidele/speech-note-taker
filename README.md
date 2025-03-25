@@ -9,3 +9,5 @@ Real-Time Transcription: Displays live speech-to-text updates dynamically in a s
 Error Handling: Alerts users of errors like unsupported browsers or microphone issues.
 Mobile Optimization: Improves usability on smaller devices.
 Visual Feedback: Buttons and text styles provide interactive and visual cues during use.
+
+deployment of speech note taker :https://aderinsolabamidele.github.io/speech-note-taker/
